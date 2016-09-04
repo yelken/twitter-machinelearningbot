@@ -49,6 +49,8 @@ class MarkovBot():
 		# Create an empty dict for the data
 		self.data = {u'default':{}}
 
+		self.context = {}
+
 
 		# # # # #
 		# TWITTER
@@ -958,25 +960,18 @@ class MarkovBot():
 					else:
 						suffix = None
 						self._message(u'_autoreply', \
-							u"Could not recognise the type of suffix '%s'; using no suffix." % (self._tweetsuffix))
-
-					# response of IBM Watson here
-
-					context = {}				
+							u"Could not recognise the type of suffix '%s'; using no suffix." % (self._tweetsuffix))								
 
 					response = conversation.message(
 					  workspace_id=workspace_id,
 					  message_input={'text': tweet[u'text']},
-					  context=context
+					  context=self.context
 					)
-
 					
-
-					context = response['context']
+					self.context = response['context']
 
 					# Construct a new tweet
 					response = response['output']['text'][0]
-
 					print(response)
 
 					# Acquire the twitter lock
