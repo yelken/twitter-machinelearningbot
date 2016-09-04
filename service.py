@@ -8,16 +8,13 @@ from markovbot import MarkovBot
 
 tweetbot = MarkovBot()
 
-
 dirname = os.path.dirname(os.path.abspath(__file__))
-book = os.path.join(dirname, u'Freud_Dream_Psychology.txt')
+book = os.path.join(dirname, u'pg7370.txt')
 tweetbot.read(book)
-
 
 my_first_text = tweetbot.generate_text(25, seedword=[u'dream', u'psychoanalysis'])
 
 print(u'\ntweetbot says: "%s"' % (my_first_text))
-
 
 # Consumer Key (API Key)
 cons_key = '1rVz2u5o37F6ycuQiXqYpmvz7'
@@ -40,13 +37,11 @@ suffix = None
 maxconvdepth = None
 
 tweetbot.twitter_autoreply_start(targetstring, keywords=keywords, prefix=prefix, suffix=suffix, maxconvdepth=maxconvdepth)
- 
-
 tweetbot.twitter_tweeting_start(days=0, hours=0, minutes=2, keywords=None, prefix=None, suffix='#hackathonSprinklr')
 
 secsinweek = 7 * 24 * 60 * 60
 time.sleep(secsinweek)
- 
+
 tweetbot.twitter_autoreply_stop()
 
 tweetbot.twitter_tweeting_stop()
