@@ -1,23 +1,4 @@
 # -*- coding: utf-8 -*-
-#
-# For installation instructions and more information, please refer to:
-# http://www.pygaze.org/2016/03/tutorial-creating-a-twitterbot/
-# (This includes instructions to install the Twitter library used here)
-#
-# This file is part of markovbot, created by Edwin Dalmaijer
-# GitHub: https://github.com/esdalmaijer/markovbot
-#
-# Markovbot is free software: you can redistribute it and/or modify
-# it under the terms of the GNU General Public License as published by
-# the Free Software Foundation, either version 3 of the License, or
-# (at your option) any later version.
-# Markovbot is distributed in the hope that it will be useful,
-# but WITHOUT ANY WARRANTY; without even the implied warranty of
-# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-# GNU General Public License for more details.
-# You should have received a copy of the GNU General Public License
-# along with markovbot.  If not, see <http://www.gnu.org/licenses/>.
-
 
 # native imports
 import os
@@ -26,12 +7,12 @@ import copy
 import time
 import pickle
 import random
+import json
 from threading import Thread, Lock
 from multiprocessing import Queue
 
-# external imports
-# Twitter package: https://pypi.python.org/pypi/twitter
-# Homepage of Twitter package: http://mike.verdone.ca/twitter/
+
+
 try:
 	import twitter
 	IMPTWITTER = True
@@ -39,6 +20,18 @@ except:
 	print(u"WARNING from Markovbot: Could not load the 'twitter' library, so Twitter functionality is not available.")
 	IMPTWITTER = False
 
+try:
+	from watson_developer_cloud import ConversationV1
+except:
+	print(u"O Watson não está instalado, por favor verifique")	
+
+conversation = ConversationV1(
+  username='1bf7ab63-da73-468d-8622-d820ff2e242b',
+  password='AlDs0JM3B3CI',
+  version='2016-07-11'
+)
+
+workspace_id = '08cf1573-abbc-4ced-881d-326a95172d75'
 
 class MarkovBot():
 	"""Class to generate text with a Markov chain, with support to read and
@@ -770,7 +763,7 @@ class MarkovBot():
 					try:
 						self._message(u'_autoreply', u'%s (@%s): %s' % \
 							(tweet[u'user'][u'name'], \
-							tweet[u'user'][u'screen_name'], tweet[u'text']))
+							tweet[u'user'][u'screen_name'], tweet[u'text']))						
 					except:
 						self._message(u'_autoreply', \
 							u'Failed to report on new Tweet :(')
@@ -967,9 +960,24 @@ class MarkovBot():
 						self._message(u'_autoreply', \
 							u"Could not recognise the type of suffix '%s'; using no suffix." % (self._tweetsuffix))
 
+					# response of IBM Watson here
+
+					context = {}				
+
+					response = conversation.message(
+					  workspace_id=workspace_id,
+					  message_input={'text': tweet[u'text']},
+					  context=context
+					)
+
+					
+
+					context = response['context']
+
 					# Construct a new tweet
-					response = self._construct_tweet(database=database, \
-						seedword=None, prefix=prefix, suffix=suffix)
+					response = response['output']['text'][0]
+
+					print(response)
 
 					# Acquire the twitter lock
 					self._tlock.acquire(True)
