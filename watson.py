@@ -23,3 +23,4 @@ response = conversation.message(
 
 print(response['output']['text'][0])
 print(response['context'])
+print(json.dumps(response, indent=2))

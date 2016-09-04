@@ -10,14 +10,13 @@ import random
 import json
 from threading import Thread, Lock
 from multiprocessing import Queue
-
-
+from conversationwatson import ConversationWatson
 
 try:
 	import twitter
 	IMPTWITTER = True
 except:
-	print(u"WARNING from Markovbot: Could not load the 'twitter' library, so Twitter functionality is not available.")
+	print(u"Warning: Could not load the 'twitter' library, so Twitter functionality is not available.")
 	IMPTWITTER = False
 
 try:
@@ -49,8 +48,8 @@ class MarkovBot():
 		# Create an empty dict for the data
 		self.data = {u'default':{}}
 
-		self.context = {}
-
+		# contexto da conversa com o Watson
+		self.listOfContexts = []
 
 		# # # # #
 		# TWITTER
@@ -962,24 +961,41 @@ class MarkovBot():
 						self._message(u'_autoreply', \
 							u"Could not recognise the type of suffix '%s'; using no suffix." % (self._tweetsuffix))								
 
-					response = conversation.message(
-					  workspace_id=workspace_id,
-					  message_input={'text': tweet[u'text']},
-					  context=self.context
-					)
-					
-					self.context = response['context']
+					contextEmpty = {}
 
-					# Construct a new tweet
-					response = response['output']['text'][0]
-					print(response)
+					if len(self.listOfContexts) == 0:
+						response = conversation.message(
+						  workspace_id=workspace_id,
+						  message_input={'text': tweet[u'text']},
+						  context=contextEmpty
+						)
+
+						cwc = ConversationWatson(tweet[u'user'][u'screen_name'], response['context'])
+						self.listOfContexts.append(cwc)
+					else:
+						currentContext = {}
+
+						for count in range(0,len(self.listOfContexts)):
+						    cw = self.listOfContexts[count]
+
+						    if cw.usuario == tweet[u'user'][u'screen_name']:
+						    	currentContext = cw.context;
+
+						response = conversation.message(
+						  workspace_id=workspace_id,
+						  message_input={'text': tweet[u'text']},
+						  context=currentContext
+						)
+
+						cwc = ConversationWatson(tweet[u'user'][u'screen_name'], response['context'])
+						self.listOfContexts.append(cwc)
 
 					# Acquire the twitter lock
 					self._tlock.acquire(True)
 					# Reply to the incoming tweet
 					try:
 						# Post a new tweet
-						resp = self._t.statuses.update(status=response,
+						resp = self._t.statuses.update(status=response['output']['text'][0],
 							in_reply_to_status_id=tweet[u'id_str'],
 							in_reply_to_user_id=tweet[u'user'][u'id_str'],
 							in_reply_to_screen_name=tweet[u'user'][u'screen_name']

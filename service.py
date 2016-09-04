@@ -9,10 +9,10 @@ from markovbot import MarkovBot
 tweetbot = MarkovBot()
 
 dirname = os.path.dirname(os.path.abspath(__file__))
-book = os.path.join(dirname, u'pg7370.txt')
+book = os.path.join(dirname, u'politicaBrasileira.txt')
 tweetbot.read(book)
 
-my_first_text = tweetbot.generate_text(25, seedword=[u'dream', u'psychoanalysis'])
+my_first_text = tweetbot.generate_text(30)
 
 print(u'\ntweetbot says: "%s"' % (my_first_text))
 
@@ -37,7 +37,7 @@ suffix = None
 maxconvdepth = None
 
 tweetbot.twitter_autoreply_start(targetstring, keywords=keywords, prefix=prefix, suffix=suffix, maxconvdepth=maxconvdepth)
-tweetbot.twitter_tweeting_start(days=0, hours=0, minutes=2, keywords=None, prefix=None, suffix='#hackathonSprinklr')
+tweetbot.twitter_tweeting_start(days=0, hours=0, minutes=1, keywords=None, prefix=None, suffix='#hackathonSprinklr #politica #imparcialidade')
 
 secsinweek = 7 * 24 * 60 * 60
 time.sleep(secsinweek)
