@@ -975,12 +975,16 @@ class MarkovBot():
 					else:
 						currentContext = {}
 
-						for count in range(0,len(self.listOfContexts)):
+						for count in range(0,len(self.listOfContexts) -1):
 						    cw = self.listOfContexts[count]
 
 						    if cw.usuario == tweet[u'user'][u'screen_name']:
 						    	currentContext = cw.context;
+						    	cw.remove(cw)
+						    	break;
 
+						
+						# chamada para a Watson Dialog    		
 						response = conversation.message(
 						  workspace_id=workspace_id,
 						  message_input={'text': tweet[u'text']},
@@ -994,8 +998,10 @@ class MarkovBot():
 					self._tlock.acquire(True)
 					# Reply to the incoming tweet
 					try:
+						prefix = u'@%s' % (tweet[u'user'][u'screen_name'])
+
 						# Post a new tweet
-						resp = self._t.statuses.update(status=response['output']['text'][0],
+						resp = self._t.statuses.update(status=u'%s %s' % (prefix, response['output']['text'][0][0:139 - len(prefix) -1]),
 							in_reply_to_status_id=tweet[u'id_str'],
 							in_reply_to_user_id=tweet[u'user'][u'id_str'],
 							in_reply_to_screen_name=tweet[u'user'][u'screen_name']
@@ -1005,7 +1011,7 @@ class MarkovBot():
 						# Store a copy of the latest outgoing tweet, for
 						# debugging purposes
 						self._lasttweetout = copy.deepcopy(resp)
-					except:
+					except Exception as e:
 						self._error(u'_autoreply', u"Failed to post a reply: '%s'" % (e))
 					# Release the twitter lock
 					self._tlock.release()
